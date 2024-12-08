@@ -2,6 +2,8 @@
 <html>
 <link rel="stylesheet" type="text/css" href="styles.css" />
 <head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     .container {
@@ -50,7 +52,7 @@
   <p>Hello! Here is a website containing a bunch of shitty stuff for you!!! There are a bunch of hidden <a style="color:black" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" title="You found me!"> secrets</a> for your personal entertainment. Have fun!</p>
   <audio id="sound1" src="metalpipe.mp3" preload="auto"></audio>
   <button id="funbutton" style="background-color: black;color:green;border-radius:5px;" onclick="changeImage();" title="Don't do it">
-    Hello!
+    Fun sounds!
   </button> 
 
   <script id = btncode>
@@ -58,7 +60,7 @@
       const img = document.getElementById("thumbsupguy");
       const button = document.getElementById("funbutton");
       if (button.pressed) {
-        BtnPressed = !eBtnPressed;
+        BtnPressed = !BtnPressed;
       }
       if (BtnPressed) {
         button.textContent = "Hello!";
@@ -104,6 +106,141 @@
   <a href="twopage.html" target=_self title="Wow there's more!">
     More
 </a>
+
+<button class="btn">Hover Me!</button>
+
+<style>
+  body {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+  .view {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .image {
+    height: 200px;
+    width: 300px;
+    margin: 50px;
+    border: 0.5mm solid black;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+      rgba(0, 0, 0, 0.3) 0px 30px 60px -30px,
+      rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+  }
+  .image:nth-child(1) {
+    background: rgb(232, 88, 67);
+  }
+  .image:nth-child(2) {
+    background: rgb(26, 84, 207);
+  }
+  .image:nth-child(3) {
+    background: rgb(36, 217, 127);
+  }
+  .image:nth-child(4) {
+    background: rgb(157, 86, 247);
+    width: 700px;
+  }
+  .image:nth-child(5) {
+    background: rgb(250, 201, 82);
+  }
+  .image:nth-child(6) {
+    background: rgb(26, 84, 207);
+  }
+  .image:nth-child(7) {
+    background: rgb(157, 86, 247);
+  }
+  .image:nth-child(8) {
+    background: rgb(36, 217, 127);
+    width: 700px;
+  }
+  .image:nth-child(9) {
+    background: rgb(232, 88, 67);
+  }
+  .image:nth-child(10) {
+    background: rgb(250, 201, 82);
+    width: 700px;
+  }
+  .image:nth-child(11) {
+    background: rgb(26, 84, 207);
+  }
+  .image:nth-child(12) {
+    background: rgb(36, 217, 127);
+  }
+  .image:nth-child(13) {
+    background: rgb(157, 86, 247);
+  }
+  .image:nth-child(14) {
+    background: rgb(250, 201, 82);
+  }
+  .image:nth-child(15) {
+    background: rgb(232, 88, 67);
+  }
+  .image:nth-child(16) {
+    background: rgb(36, 217, 127);
+    width: 700px;
+  }
+  .image:nth-child(17) {
+    background: rgb(157, 86, 247);
+  }
+  .image:nth-child(18) {
+    background: rgb(26, 84, 207);
+  }
+  .image:nth-child(19) {
+    background: rgb(250, 201, 82);
+  }
+  .image:nth-child(20) {
+    background: rgb(232, 88, 67);
+    width: 700px;
+  }
+
+  @keyframes appear {
+    from {
+      opacity: 0;
+      clip-path: inset(100% 100% 0 0);
+    }
+    to {
+      opacity: 1;
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  .image {
+    animation: appear linear;
+    animation-timeline: view();
+    animation-range: entry 0% cover 40%;
+  }
+</style>
+</head>
+<body>
+<h1>Your mom</h1>
+<div class="view">
+  <div class="image" click me!></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+  <div class="image"></div>
+</div>
+</body>
+</html>
 <br>
 <br>
 <br>
