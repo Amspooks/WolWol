@@ -10,7 +10,7 @@
     }
     .image {
       display: block;
-      width: 100%;
+      width: 1000%;
       height: auto;
     }
     .overlay {
@@ -39,30 +39,107 @@
     }
   </style>
 </head>
-<body style="background-color: #FF7F7F;">
+<body style="background-color: #ffffff;">
 
-  <h1>Your site</h1>
-  <p>Hello! Here is a website containing a bunch of shitty stuff for you!!!</p>
-
+  <h1 class="cente">Your site</h1>
+  <h4>You have wasted:</h4>
+  <h3 id="timer">0</h3>
+  <h4>seconds on this site</h4>
+  <Br>
+    <!--Astro is so short lol-->
+  <p>Hello! Here is a website containing a bunch of shitty stuff for you!!! There are a bunch of hidden <a style="color:black" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" title="You found me!"> secrets</a> for your personal entertainment. Have fun!</p>
   <audio id="sound1" src="metalpipe.mp3" preload="auto"></audio>
-  <button onclick="document.getElementById('sound1').play();">Click if gay</button>
+  <button id="funbutton" style="background-color: black;color:green;border-radius:5px;" onclick="changeImage();" title="Don't do it">
+    Fun sounds!
+  </button> 
 
-  <script>
+  <script id = btncode>
     function changeImage() {
       const img = document.getElementById("thumbsupguy");
-      if (img.src.includes("thumbsupguy.png")) {
-        img.src = "mee6.png";
-      } else {
-        img.src = "thumbsupguy.png";
+      const button = document.getElementById("funbutton");
+      if (button.pressed) {
+        BtnPressed = !BtnPressed;
       }
+      if (BtnPressed) {
+        button.textContent = "Hello!";
+      }
+      else{
+        button.textContent = "kys";
+      }
+    }
+  </script>
+  <script id = timer>
+    const counter = 0;
+    function changeImage() {
+      const img = document.getElementById("thumbsupguy");
+      const button = document.getElementById("funbutton");
+      if (button.pressed) {
+        BtnPressed = !BtnPressed;
+      }
+      if (BtnPressed) {
+        button.textContent = "hello!";
+      }
+      else{
+        button.textContent = "kys";
+      }
+    }
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    while (true) {
+      sleep(100); 
+      counter += 1;
+      document.getElementById("timer").textContent = Integer.toString(counter);
     }
   </script>
   <div class="container">
     <img src="thumbsupguy.png" alt="Avatar" class="image" id="thumbsupguy" onclick="changeImage()">
     <div class="overlay">
-      <div class="text">Click to change</div>
+      <div class="text" title="More images!">Click to change </div> 
     </div>
   </div>
+  <video controls src="Racing.mp4" width="500">
+  </video>
+  
+  <a href="twopage.html" target=_self title="Wow there's more!">
+    More
+</a>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 
+<hr>
+<form action="action_page.php" method="POST">
+<div>     
+    <label for="fname">First Name:</label>
+    <input style="background-color: white;color:black;border-radius:5px;" type="text" id="fname" name="fname" placeholder="Fuckinghell@gmailing.com" required>
+</div>
+<div>
+<label for="fname">Thoughts:</label>
+<input style="background-color: white;color:black;border-radius:5px;" type="text" id="thoughts" name="thoughts" placeholder="hate this stupid site ewwwww" title="I don't know this is here man" required>
+</div>
+<br>
+<div>
+    <input style="border-radius:10px;" type="reset">
+</div>
+<div>
+    <input style="border-radius:10px;" type="submit">
+</div>
+  </form>
 </body>
 </html>
