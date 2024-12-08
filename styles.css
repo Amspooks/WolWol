@@ -1,5 +1,30 @@
-{
-  font-family: wingdings;
+p {
+  font-family: papyrus;
   font-size: 20px;
-  color: #FF7A59;
+  color: #000000;
+}
+h1 {
+  font-family: sans-serif;
+  font-size: 20px;
+  color: #000000;
+}
+h2 {
+  font-family: papyrus;
+  font-size: 20px;
+  color: #000000;
+}
+h3 {
+  font-family: papyrus;
+  font-size: 20px;
+  color: #000000;
+}
+h4 {
+  font-family: papyrus;
+  font-size: 20px;
+  color: #000000;
+}
+div{
+  font-family: papyrus;
+  font-size: 20px;
+  color: #000000;
 }
