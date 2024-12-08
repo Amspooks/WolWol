@@ -1,66 +1,67 @@
 <!DOCTYPE html>
 <html>
-<body style="background-color: #FF7F7F; "font-family: sans-serif">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    .container {
+      position: relative;
+      width: 50%;
+    }
+    .image {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .overlay {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+      width: 100%;
+      opacity: 0;
+      transition: 0.5s ease;
+      background-color: #008CBA;
+    }
+    .container:hover .overlay {
+      opacity: 1;
+    }
+    .text {
+      color: white;
+      font-size: 20px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+  </style>
+</head>
+<body style="background-color: #FF7F7F;">
+
+  <h1>Your site</h1>
+  <p>Hello! Here is a website containing a bunch of shitty stuff for you!!!</p>
+
+  <audio id="sound1" src="metalpipe.mp3" preload="auto"></audio>
+  <button onclick="document.getElementById('sound1').play();">Click if gay</button>
+
   <script>
     function changeImage() {
-    if (document.getElementById("thumbsupguy").src == "thumbsupguy.png"){
-        document.getElementById("thumbsupguy").src = "mee6.png";
-    } else {
-        document.getElementById("thumbsupguy").src = "thumbsupguy.png";
+      const img = document.getElementById("thumbsupguy");
+      if (img.src.includes("thumbsupguy.png")) {
+        img.src = "mee6.png";
+      } else {
+        img.src = "thumbsupguy.png";
+      }
     }
-}
   </script>
-<h1>Your site</h1>
-<p>Hello! Here is a website containing a bunch of shitty stuff for you!!!</p>
-<audio id="sound1" src="metalpipe.mp3" preload="auto"></audio>
-  <button onclick="document.getElementById('sound1').play();">Click if gay</button>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-.container {
-  position: relative;
-  width: 50%;
-}
-.image {
-  display: block;
-  width: 20%;
-  height: 30%;
-}
-.overlay {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  width: 20%;
-  opacity: 0;
-  transition: .5s ease;
-  background-color: #008CBA;
-}
-.container:hover .overlay {
-  opacity: 1;
-}
-.text {
-  color: white;
-  font-size: 20px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  -ms-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-  text-align: center;
-}
-</style>
-</head>
-<body>
-<img src="thumbsupguy.png" alt="Avatar" class="image" id="thumbsupguy" onclick="changeImage()">
-<div class="container">
-  <div class="overlay">
-    <div class="text">Click to change</div>
+  <div class="container">
+    <img src="thumbsupguy.png" alt="Avatar" class="image" id="thumbsupguy" onclick="changeImage()">
+    <div class="overlay">
+      <div class="text">Click to change</div>
+    </div>
   </div>
-</div>
-</body>  
+
 </body>
 </html>
