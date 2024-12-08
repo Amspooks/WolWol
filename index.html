@@ -46,12 +46,21 @@
 </style>
 </head>
 <body>
+<img src="thumbsupguy.png" alt="Avatar" class="image" id="thumbsupguy" onclick="changeImage()">
 <div class="container">
-  <img src="thumbsupguy.png" alt="Avatar" class="image">
   <div class="overlay">
     <div class="text">Click to change</div>
   </div>
 </div>
+  <script>
+    function changeImage() {
+    if (document.getElementById("thumbsupguy").src == "thumbsupguy.png"){
+        document.getElementById("thumbsupguy").src = "mee6.png";
+    } else {
+        document.getElementById("thumbsupguy").src = "thumbsupguy.png";
+    }
+}
+  </script>
 </body>
   
 </body>
