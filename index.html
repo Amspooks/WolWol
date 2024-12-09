@@ -140,4 +140,40 @@
       <p style="font-size: 10px"> Click the dots to look at different images!</p>
 		</div>
 	</div>
+		<head>
+    <title>
+        Button Label
+    </title>
+    <style>
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        h1 {
+            color: green;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>GeeksforGeeks</h1>
+    <h3>Using innerText property</h3>
+    <button onclick="toggleLabel()">
+        Click me
+    </button>
+    <script>
+        function toggleLabel() {
+            const btn = 
+                document.querySelector('button');
+            if (btn.innerText === 'Click me') {
+                btn.innerText = 'Label Changed!';
+            } else {
+                btn.innerText = 'Click me';
+            }
+        }
+    </script>
+</body>
 </section>
