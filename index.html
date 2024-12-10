@@ -112,8 +112,7 @@
 
   <script id = btncode>
     function changeImage() {
-      const img = document.getElementById("thumbsupguy");
-      const button = document.getElementById("funbutton");
+      const img = document.getElementById("thumbsupimage");
       if (button.pressed) {
         BtnPressed = !BtnPressed;
       }
@@ -153,7 +152,7 @@
     
   </script>
   <div class="container">
-    <img src="thumbsupguy.png" alt="Avatar" class="image" id="thumbsupguy" width="300" class="center" onclick="changeImage()">
+    <img src="thumbsupguy.png" alt="Avatar" class="image" id="thumbsupguy" width="300" class="center" onclick="changeImage()" margin=auto>
     <div class="overlay">
       <div class="text" title="More images!">Click to change </div> 
     </div>
