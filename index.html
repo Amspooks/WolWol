@@ -126,17 +126,16 @@
   </script>
   <script id = yippee>
     const counter = 0;
+    let BtnPressed = False;
     function changeImage() {
       const img = document.getElementById("thumbsupguy");
       const button = document.getElementById("funbutton");
-      if (button.pressed) {
-        BtnPressed = !BtnPressed;
-      }
+      BtnPressed = !BtnPressed;
       if (BtnPressed) {
-        button.textContent = "hello!";
+        img.src = "eee.jpeg";
       }
       else{
-        button.textContent = "kys";
+        img.src = "thumbsupguy.png";
       }
     }
     
