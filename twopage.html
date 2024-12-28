@@ -73,7 +73,31 @@
   <button id="randomButton" onclick="addbread()">Bread!</button>
 
   <script>
+    
     const button = document.getElementById('randomButton');
+
+        const button = document.getElementById('randomButton');
+    const messages = [
+      "Ow",
+      "Stop it",
+      "That hurts",
+      ":(",
+      "You're being mean",
+      "Ouch",
+      "Let me speak to a manager",
+      "This sucks",
+      "Eternal torture",
+      "Help",
+      "I'm calling 911",
+      "Bruh"
+    ];
+
+    button.addEventListener('click', () => {
+      // Randomly pick a message from the array
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+      // Set the button text to the randomly selected message
+      button.textContent = randomMessage;
 
     button.addEventListener('click', () => {
       // Add the blow-up animation class
