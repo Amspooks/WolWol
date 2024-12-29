@@ -215,7 +215,8 @@ canvas.addEventListener("mousedown", (event) => {
   const mouseY = event.offsetY;
 
   // Check if the mouse is over any bread
-  for (const breaddata of breadinfo) {
+    for (let i = breadinfo.length - 1; i >= 0; i--) {
+      const breaddata = breadinfo[i];
     const breadImage = skibidibread[breaddata.srcname];
     const breadLeft = breaddata.x - breadImage.width / 2;
     const breadRight = breaddata.x + breadImage.width / 2;
