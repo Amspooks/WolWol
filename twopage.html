@@ -266,36 +266,35 @@ function loadframe() {
   // Draw the current frame
   drawframe();
 }
-// Utility to get non-transparent pixels of an image at its current position
+const COLLISION_DAMPING = 0.5; // Factor to reduce velocity after collision
+
 function getBreadPixelData(bread) {
   const imageDataCanvas = document.createElement("canvas");
   const tempCtx = imageDataCanvas.getContext("2d");
   const breadImage = skibidibread[bread.srcname];
-  
+
   imageDataCanvas.width = breadImage.width;
   imageDataCanvas.height = breadImage.height;
 
-  // Draw the bread image at (0, 0) to extract pixel data
   tempCtx.drawImage(bread.src, 0, 0);
-  
+  const imageData = tempCtx.getImageData(0, 0, breadImage.width, breadImage.height);
+
   return {
-    imageData: tempCtx.getImageData(0, 0, breadImage.width, breadImage.height),
+    imageData,
     offsetX: bread.x - breadImage.width / 2,
     offsetY: bread.y - breadImage.height / 2,
   };
 }
 
-// Function to check pixel-perfect collision between two bread pieces
 function isPixelCollision(bread1Data, bread2Data) {
   const { imageData: imgData1, offsetX: offsetX1, offsetY: offsetY1 } = bread1Data;
   const { imageData: imgData2, offsetX: offsetX2, offsetY: offsetY2 } = bread2Data;
 
-  for (let y = 0; y < imgData1.height; y++) {
-    for (let x = 0; x < imgData1.width; x++) {
-      const pixelIndex1 = (y * imgData1.width + x) * 4;
-
-      const x2 = x + offsetX1 - offsetX2;
-      const y2 = y + offsetY1 - offsetY2;
+  for (let y1 = 0; y1 < imgData1.height; y1++) {
+    for (let x1 = 0; x1 < imgData1.width; x1++) {
+      const pixelIndex1 = (y1 * imgData1.width + x1) * 4;
+      const x2 = x1 + offsetX1 - offsetX2;
+      const y2 = y1 + offsetY1 - offsetY2;
 
       if (x2 >= 0 && x2 < imgData2.width && y2 >= 0 && y2 < imgData2.height) {
         const pixelIndex2 = (y2 * imgData2.width + x2) * 4;
@@ -304,7 +303,6 @@ function isPixelCollision(bread1Data, bread2Data) {
         const alpha2 = imgData2.data[pixelIndex2 + 3];
 
         if (alpha1 > 0 && alpha2 > 0) {
-          // Non-transparent pixels from both images are overlapping
           return true;
         }
       }
@@ -313,7 +311,6 @@ function isPixelCollision(bread1Data, bread2Data) {
   return false;
 }
 
-// Updated collision detection with pixel-perfect checks
 function detectAndHandleCollisions() {
   for (let i = 0; i < breadinfo.length; i++) {
     for (let j = i + 1; j < breadinfo.length; j++) {
@@ -322,32 +319,48 @@ function detectAndHandleCollisions() {
 
       if (bread1 === draggedBread || bread2 === draggedBread) continue;
 
-      // Get pixel data for both bread pieces
       const bread1Data = getBreadPixelData(bread1);
       const bread2Data = getBreadPixelData(bread2);
 
       if (isPixelCollision(bread1Data, bread2Data)) {
-        // Resolve the collision (separating and damping as before)
         const dx = bread1.x - bread2.x;
         const dy = bread1.y - bread2.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const overlap = 1; // Resolve overlap minimally for visual effect
+        const distance = Math.sqrt(dx * dx + dy * dy) || 1;
 
         const nx = dx / distance;
         const ny = dy / distance;
 
+        const overlap = 1; // Minimal visual separation
         bread1.x += nx * overlap;
         bread1.y += ny * overlap;
         bread2.x -= nx * overlap;
         bread2.y -= ny * overlap;
 
-        // Apply simple damping
-        const impulse = (2 * (bread1.yvel - bread2.yvel)) / 2; // Assume equal mass
-        bread1.yvel -= impulse * ny * COLLISION_DAMPING;
-        bread2.yvel += impulse * ny * COLLISION_DAMPING;
+        const impulse = (bread1.yvel - bread2.yvel) * COLLISION_DAMPING;
+        bread1.yvel -= impulse * ny;
+        bread2.yvel += impulse * ny;
       }
     }
   }
+}
+
+// Update the loadframe function to include collision detection
+function loadframe() {
+  for (const breaddata of breadinfo) {
+    if (breaddata !== draggedBread) {
+      breaddata.yvel -= gravity;
+      breaddata.y -= breaddata.yvel;
+
+      const floorLevel = 700 - skibidibread[breaddata.srcname].height / 2;
+      if (breaddata.y >= floorLevel) {
+        breaddata.y = floorLevel;
+        breaddata.yvel = 0;
+      }
+    }
+  }
+
+  detectAndHandleCollisions(); // Call collision detection
+  drawframe();
 }
   </script>
 </body>
