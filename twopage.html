@@ -266,78 +266,77 @@ function loadframe() {
   // Draw the current frame
   drawframe();
 }
-      const COLLISION_DAMPING = 0.8; // Energy lost during collisions
+    const COLLISION_DAMPING = 0.8; // Energy lost during collisions
 
-  function detectAndHandleCollisions() {
-    for (let i = 0; i < breadinfo.length; i++) {
-      for (let j = i + 1; j < breadinfo.length; j++) {
-        const bread1 = breadinfo[i];
-        const bread2 = breadinfo[j];
+// Function to detect and handle collisions
+function detectAndHandleCollisions() {
+  for (let i = 0; i < breadinfo.length; i++) {
+    for (let j = i + 1; j < breadinfo.length; j++) {
+      const bread1 = breadinfo[i];
+      const bread2 = breadinfo[j];
 
-        // Calculate the distance between the centers of the two pieces of bread
-        const dx = bread1.x - bread2.x;
-        const dy = bread1.y - bread2.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+      // Skip if either bread is currently being dragged
+      if (bread1 === draggedBread || bread2 === draggedBread) continue;
 
-        // Calculate the sum of their radii (approximation using width/height)
-        const radius1 = skibidibread[bread1.srcname].width / 2;
-        const radius2 = skibidibread[bread2.srcname].width / 2;
+      // Calculate the distance between centers
+      const dx = bread1.x - bread2.x;
+      const dy = bread1.y - bread2.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance < radius1 + radius2) {
-          // Collision detected, resolve overlap
-          const overlap = radius1 + radius2 - distance;
+      // Radii (approximation using half the width/height of the images)
+      const radius1 = skibidibread[bread1.srcname].width / 2;
+      const radius2 = skibidibread[bread2.srcname].width / 2;
 
-          // Normalize the collision vector
-          const nx = dx / distance;
-          const ny = dy / distance;
+      if (distance < radius1 + radius2) {
+        // Collision detected
+        const overlap = radius1 + radius2 - distance;
 
-          // Separate the bread pieces
-          bread1.x += nx * (overlap / 2);
-          bread1.y += ny * (overlap / 2);
-          bread2.x -= nx * (overlap / 2);
-          bread2.y -= ny * (overlap / 2);
+        // Normalize the collision vector
+        const nx = dx / distance;
+        const ny = dy / distance;
 
-          // Adjust velocities to simulate collision response
-          const relativeVelocityX = bread1.xvel - bread2.xvel;
-          const relativeVelocityY = bread1.yvel - bread2.yvel;
+        // Separate the bread pieces to resolve overlap
+        bread1.x += nx * (overlap / 2);
+        bread1.y += ny * (overlap / 2);
+        bread2.x -= nx * (overlap / 2);
+        bread2.y -= ny * (overlap / 2);
 
-          const dotProduct = relativeVelocityX * nx + relativeVelocityY * ny;
+        // Calculate relative velocity
+        const relativeVelocityX = bread1.yvel - bread2.yvel;
+        const relativeVelocityY = bread1.yvel - bread2.yvel;
+        const dotProduct = relativeVelocityX * nx + relativeVelocityY * ny;
 
-          // Apply collision damping
-          const impulse = (2 * dotProduct) / (1 + 1); // Equal mass assumed
-          bread1.xvel -= impulse * nx * COLLISION_DAMPING;
-          bread1.yvel -= impulse * ny * COLLISION_DAMPING;
-          bread2.xvel += impulse * nx * COLLISION_DAMPING;
-          bread2.yvel += impulse * ny * COLLISION_DAMPING;
-        }
+        // Apply impulse to simulate bounce
+        const impulse = (2 * dotProduct) / (1 + 1); // Assume equal mass for simplicity
+        bread1.yvel -= impulse * ny * COLLISION_DAMPING;
+        bread2.yvel += impulse * ny * COLLISION_DAMPING;
       }
     }
   }
+}
 
-  function loadframe() {
-    // Update bread physics
-    for (const breaddata of breadinfo) {
+// Update the loadframe function to include collision detection
+function loadframe() {
+  for (const breaddata of breadinfo) {
+    if (breaddata !== draggedBread) {
+      // Only apply gravity if the bread is not being dragged
       breaddata.yvel -= gravity;
-      breaddata.x += breaddata.xvel || 0; // Update x position
-      breaddata.y += breaddata.yvel;
+      breaddata.y -= breaddata.yvel;
 
-      const floorlevel = 700 - skibidibread[breaddata.srcname].height / 2;
-      if (breaddata.y >= floorlevel) {
-        breaddata.y = floorlevel;
-        breaddata.yvel *= -COLLISION_DAMPING; // Bounce off the floor
-      }
-
-      if (breaddata.x <= 0 || breaddata.x >= canvas.width - skibidibread[breaddata.srcname].width / 2) {
-        breaddata.xvel *= -COLLISION_DAMPING; // Bounce off the walls
+      const floorLevel = 700 - skibidibread[breaddata.srcname].height / 2;
+      if (breaddata.y >= floorLevel) {
+        breaddata.y = floorLevel;
+        breaddata.yvel = 0;
       }
     }
-
-    // Check for collisions
-    detectAndHandleCollisions();
-
-    // Draw the current frame
-    drawframe();
   }
+
+  // Handle collisions between bread pieces
+  detectAndHandleCollisions();
+
+  // Draw the current frame
+  drawframe();
+}
   </script>
 </body>
 </html>
