@@ -206,6 +206,65 @@
         }
       )
     }
+    let draggedBread = null; // Tracks the bread currently being dragged
+let offsetX = 0, offsetY = 0; // Offset between the mouse and the bread's top-left corner
+
+// Add mouse event listeners to the canvas
+canvas.addEventListener("mousedown", (event) => {
+  const mouseX = event.offsetX;
+  const mouseY = event.offsetY;
+
+  // Check if the mouse is over any bread
+  for (const breaddata of breadinfo) {
+    const breadImage = skibidibread[breaddata.srcname];
+    const breadLeft = breaddata.x - breadImage.width / 2;
+    const breadRight = breaddata.x + breadImage.width / 2;
+    const breadTop = breaddata.y - breadImage.height / 2;
+    const breadBottom = breaddata.y + breadImage.height / 2;
+
+    if (mouseX >= breadLeft && mouseX <= breadRight && mouseY >= breadTop && mouseY <= breadBottom) {
+      draggedBread = breaddata;
+      offsetX = mouseX - breaddata.x;
+      offsetY = mouseY - breaddata.y;
+      break;
+    }
+  }
+});
+canvas.addEventListener("mousemove", (event) => {
+  if (draggedBread) {
+    // Update the dragged bread's position
+    draggedBread.x = event.offsetX - offsetX;
+    draggedBread.y = event.offsetY - offsetY;
+  }
+});
+
+canvas.addEventListener("mouseup", () => {
+  if (draggedBread) {
+    // Stop dragging
+    draggedBread = null;
+  }
+});
+
+// Update the loadframe function
+function loadframe() {
+  // Do the game logic stuff
+  for (const breaddata of breadinfo) {
+    if (breaddata !== draggedBread) {
+      // Only apply gravity if the bread is not being dragged
+      breaddata.yvel -= gravity;
+      breaddata.y -= breaddata.yvel;
+
+      const floorLevel = 700 - skibidibread[breaddata.srcname].height / 2;
+      if (breaddata.y >= floorLevel) {
+        breaddata.y = floorLevel;
+        breaddata.yvel = 0;
+      }
+    }
+  }
+
+  // Draw the current frame
+  drawframe();
+}
   </script>
 </body>
 </html>
