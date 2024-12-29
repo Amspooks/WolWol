@@ -39,6 +39,19 @@
       transition: transform 0.2s ease, top 0.2s ease, left 0.2s ease;
     }
 
+    #randomButton2 {
+      position: absolute; /* Ensure button is absolutely positioned */
+      padding: 10px 20px;
+      left: 150px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #e46c66;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      transition: transform 0.2s ease, top 0.2s ease, left 0.2s ease;
+    }
+
     /* Blow-up animation */
     .blow-up {
       animation: blowUp 0.4s ease-out forwards;
@@ -70,8 +83,10 @@
   </div>
 
   <p>I like bread</p>
+  <p id="BreadCount">BreadCount: 0</p>
 
-  <button id="randomButton" onclick="addbread()">Bread!</button>
+  <button id="randomButton">Bread!</button>
+  <button id="randomButton2">ByeBye Bread!</button>
 
   <script>
     const button = document.getElementById('randomButton');
@@ -101,7 +116,36 @@
       "Bruh"
     ];
 
+    const button2 = document.getElementById('randomButton2');
+    const messages2 = [
+      "Bread Dumb",
+      "Delete Bread",
+      "Bread Smelly",
+      ":)",
+      "You're being nice",
+      "Yipppeee",
+      "I hate bread",
+      "This is awesome",
+      "no more torture",
+      "Good Button",
+      "I'm calling you",
+      "Skibidi",
+      "Nice!",
+      "$20 is $20 ;)",
+      "This makes me happy",
+      "I love you",
+      "aghhh",
+      "keep goinggggggg",
+      "I hope you win the lottery",
+      "love?",
+      "I'm out of messages!",
+      "I'm gonna kiss you",
+      "Bruh!"
+    ];
+
     button.addEventListener('click', () => {
+      addbread()
+
       // Randomly pick a message from the array
       const randomMessage = messages[Math.floor(Math.random() * messages.length)];
 
@@ -127,6 +171,35 @@
       // Set the button's new position
       button.style.left = `${randomX}px`;
       button.style.top = `${randomY}px`;
+    });
+
+    button2.addEventListener('click', () => {
+      clearbread()
+      // Randomly pick a message from the array
+      const randomMessage2 = messages2[Math.floor(Math.random() * messages2.length)];
+
+      // Set the button text to the randomly selected message
+      button2.textContent = randomMessage2;
+
+      // Add the blow-up animation class
+      button2.classList.add('blow-up');
+
+      // Remove the class after the animation ends
+      setTimeout(() => {
+        button2.classList.remove('blow-up');
+      }, 400); // Matches the duration of the animation
+
+      // Get the dimensions of the viewport
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Generate random positions
+      const randomX2 = Math.random() * (viewportWidth - button2.offsetWidth);
+      const randomY2 = Math.random() * (viewportHeight - button2.offsetHeight);
+
+      // Set the button's new position
+      button2.style.left = `${randomX2}px`;
+      button2.style.top = `${randomY2}px`;
     });
   </script>
   
@@ -195,6 +268,7 @@
 
     function addbread()
     {
+      document.getElementById("BreadCount").innerText = "BreadCount: "+(breadinfo.length+1)
       imgnum = Math.floor(Math.random()*bread.length);
       breadinfo.push(
         {
@@ -205,6 +279,11 @@
           yvel: 0
         }
       )
+    }
+
+    function clearbread() {
+      document.getElementById("BreadCount").innerText = "BreadCount: 0"
+      breadinfo=[]
     }
     let draggedBread = null; // Tracks the bread currently being dragged
 let offsetX = 0, offsetY = 0; // Offset between the mouse and the bread's top-left corner
