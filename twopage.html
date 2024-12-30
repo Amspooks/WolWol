@@ -70,7 +70,7 @@
     }
   </style>
 </head>
-  <body onload="breadgame = setInterval(loadframe, 10);">
+  <body onload="breadgame = setInterval(loadframe, 10);" onmousedown="mousedown(event)" onmousemove="mousemoving(event)" onmouseup="mouseup(event)">
 
   <div class="topnav">
     <a href="index.html">Home</a>
@@ -237,8 +237,14 @@
       // do the game logic stuff
       for (const breaddata of breadinfo)
       {
-        breaddata.yvel -= gravity;
-        breaddata.y -= breaddata.yvel;
+        if (!breaddata.chosenOne) // only if the bread is not the chosen one
+        {
+          breaddata.yvel -= gravity;
+          breaddata.y -= breaddata.yvel;
+        } else
+        {
+          breaddata.yvel = 0 // make sure it doesnt go anywhere
+        }
 
         floorlevel = 700-skibidibread[breaddata.srcname].height/2;
         if (breaddata.y >= floorlevel)
@@ -250,6 +256,87 @@
       // draw the current frame
       drawframe();
     }
+
+    function mousedown(evt)
+    {
+      for (const breaddata of breadinfo)
+      {
+        xyrange = [
+          breaddata.x - skibidibread[breaddata.srcname].width/2, 
+          breaddata.x + skibidibread[breaddata.srcname].width/2,
+          breaddata.y - skibidibread[breaddata.srcname].height/2,
+          breaddata.y + skibidibread[breaddata.srcname].height/2
+        ] // [left, right, up, down]
+        mousePos = getMousePos(evt)
+        if (xyrange[0] < mousePos.x && xyrange[1] > mousePos.x && xyrange[2] < mousePos.y && xyrange[3] > mousePos.y) // check if mousepos in xyrange "box"
+        {
+          //the chosen one
+          breaddata.x = mousePos.x
+          breaddata.y = mousePos.y
+          breaddata.yvel = 0
+          breaddata.chosenOne = true
+          break
+        }
+      }
+    }
+
+    function mousemoving(evt)
+    {
+      mousePos = getMousePos(evt)
+      for (const breaddata of breadinfo)
+      {
+        if (breaddata.chosenOne) // are you the chosen one??
+        {
+          breaddata.x = mousePos.x
+          breaddata.y = mousePos.y
+          floorlevel = 700-skibidibread[breaddata.srcname].height/2;
+          ceilinglevel = skibidibread[breaddata.srcname].height/2;
+          rightwalllevel = 700-skibidibread[breaddata.srcname].width/2;
+          leftwalllevel = skibidibread[breaddata.srcname].width/2;
+          if (breaddata.y >= floorlevel) // these are checks to see if the bread is dragged out of bounds
+          {
+            console.log("floorlevel")
+            breaddata.y = floorlevel;
+          }
+          if (breaddata.y <= ceilinglevel)
+          {
+            console.log("ceilinglevel")
+            breaddata.y = ceilinglevel;
+          }
+          if (breaddata.x >= rightwalllevel)
+          {
+            console.log("rightwall")
+            breaddata.x = rightwalllevel;
+          }
+          if (breaddata.x <= leftwalllevel)
+          {
+            console.log("leftwall")
+            breaddata.x = leftwalllevel;
+          }
+        }
+      }
+    }
+
+    function mouseup(evt)
+    {
+      //the bread is free!!!
+      for (const breaddata of breadinfo)
+      {
+        breaddata.chosenOne = false // liberate all of them it doesnt matter if they already are or not
+      }
+    }
+
+    function getMousePos(evt)
+    {
+      var rect = canvas.getBoundingClientRect(), // abs. size of element
+      scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for x
+      scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for y
+
+      return {
+        x: (evt.clientX - rect.left) * scaleX,   // scale mouse coordinates after they have
+        y: (evt.clientY - rect.top) * scaleY     // been adjusted to be relative to element
+      }
+}
     
     function skibidiimagecoord(imagename,coord) {
       return [coord[0]-skibidibread[imagename].width/2,coord[1]-skibidibread[imagename].height/2]
@@ -276,7 +363,8 @@
           srcname: bread[imgnum][0],
           x: 350,
           y: 0,
-          yvel: 0
+          yvel: 0,
+          chosenOne: false //true if bread is being picked up by mouse
         }
       )
     }
