@@ -71,7 +71,7 @@
     <!--Astro is so short lol-->
   <p>Hello! Here is a website containing a bunch of shitty stuff for you!!! There are a bunch of hidden <a style="color:black" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" title="You found me!"> secrets</a> for your personal entertainment. Have fun!</p>
   <audio id="sound1" src="metalpipe.mp3" preload="auto"></audio>
-  <button id="funbutton" style="background-color: black;color:green;border-radius:5px;" onclick="document.getElementById('sound1').cloneNode(true).play();" title="Don't do it">
+  <button id="funbutton" style="background-color: black;color:green;border-radius:5px;" onclick="clickSoundButton()" title="Don't do it">
     Fun sounds!
   </button> 
 
@@ -90,7 +90,6 @@
     }
   </script>
   <script id = yippee>
-    const counter = 0;
     let BtnPressed = false;
     function changeImage() {
       const img = document.getElementById("thumbsupguy");
@@ -170,7 +169,17 @@
         }
     </script>
 </body>
-
+    <script>
+      var counter1 = 0;
+      function clickSoundButton() {
+        counter1++;
+        console.log(counter1)
+        document.getElementById('sound1').cloneNode(true).play();
+        if (counter1 >= 10)
+        {
+          window.open("https://www.youtube.com/shorts/YFRRwPNKv0A");
+        }
+      }
     </script>
 </body>
 </section>
