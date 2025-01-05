@@ -42,7 +42,27 @@
 
 </body>
   
-<p>Why me.</p>
+<h1>Use the up and down arrow keys to move up and down</h1>
 
 </body>
+<canvas id="carbox" width="900" height="450" style="border:1px solid #dfdfdf;"> haha your browser no worky hahahahaha</canvas>
+<script>
+  var canvas = document.getElementById("carbox")
+  var ctx = canvas.getContext("2d")
+
+  var obstacleimg = []
+  var obstacles = ["dogshock.png", "guy.png", "pointbaby.png", "asdf.jpeg"]
+  
+  obstaclelist = {} // "filename":{"x":filex,"y":filey,"type":0-listlength} is 1 element of it 
+    for (const obstacle of obstacles) {
+      im = new Image();
+      im.src="obstacles/"+obstacle;
+      
+      obstaclelist[obstacle] = {width: obstacleimg[obstacles.indexOf(obstacle)].naturalWidth, height: obstacle}
+    }
+
+  function skibidiimagecoord(imagename,coord) {
+    return [coord[0]-skibidibread[imagename].width/2,coord[1]-skibidibread[imagename].height/2]
+  }
+</script>
 </html>
