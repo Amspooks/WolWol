@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -28,7 +29,7 @@
 }
 </style>
 </head>
-<body>
+<body onload = "setupgameiguess()">
 
 <div class="topnav">
   <a href="index.html">Home</a>
@@ -47,19 +48,31 @@
 </body>
 <canvas id="carbox" width="900" height="450" style="border:1px solid #dfdfdf;"> haha your browser no worky hahahahaha</canvas>
 <script>
-  var canvas = document.getElementById("carbox")
-  var ctx = canvas.getContext("2d")
+  var canvas = document.getElementById("carbox") // get the canvas and stuff
+  var ctx = canvas.getContext("2d") // enables drawing on the canvas
 
-  var obstacleimg = []
-  var obstacles = ["dogshock.png", "guy.png", "pointbaby.png", "asdf.jpeg"]
-  
-  obstaclelist = {} // "filename":{"x":filex,"y":filey,"type":0-listlength} is 1 element of it 
+  var obstacleimg = [] // the list of actual image objects
+  var obstacles = ["dogshock.png", "guy.png", "pointbaby.jpeg", "asdf.jpeg"] //sources to the obstacle images
+
+  var carlane = 2; // which lane the car is currently on (top to bottom)
+  var time = 0; // time elapsed
+
+
+  obstaclelist = {} // format :  "filename":{"x":filex, "y":filey} 
+
+  function setupgameiguess() {
     for (const obstacle of obstacles) {
-      im = new Image();
-      im.src="obstacles/"+obstacle;
+      im = new Image() // set temporary variable "im" to a new image object
+      im.src="obstacles/"+obstacle // defining the source of the image object previously created
       
-      obstaclelist[obstacle] = {width: obstacleimg[obstacles.indexOf(obstacle)].naturalWidth, height: obstacle}
+      obstacleimg.push(im) // add variable "im" to obstacleimg
+
+      // dont worry about this all you have to know is that it adds the formatting to obstaclelist
+      console.log(obstacleimg[obstacles.indexOf(obstacle)])
+      obstaclelist[obstacle] = {width: obstacleimg[obstacles.indexOf(obstacle)].naturalWidth, height: obstacleimg[obstacles.indexOf(obstacle)].naturalHeight}
     }
+  }
+
 
   function skibidiimagecoord(imagename,coord) {
     return [coord[0]-skibidibread[imagename].width/2,coord[1]-skibidibread[imagename].height/2]
