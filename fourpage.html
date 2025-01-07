@@ -51,8 +51,8 @@
   var canvas = document.getElementById("carbox") // get the canvas and stuff
   var ctx = canvas.getContext("2d") // enables drawing on the canvas
 
-  var obstacleimg = [] // the list of actual image objects
-  var obstacles = ["dogshock.png", "guy.png", "pointbaby.jpeg", "asdf.jpeg"] //sources to the obstacle images
+  var obstacleobj = [] // the list of actual image objects
+  var obstacles = ["dogshock.png", "guy.png", "pointbaby.jpeg", "asdf.jpeg"] //sources to the obstacle images, edit this manually
 
   var carlane = 2; // which lane the car is currently on (top to bottom)
   var time = 0; // time elapsed
@@ -65,12 +65,15 @@
       im = new Image() // set temporary variable "im" to a new image object
       im.src="obstacles/"+obstacle // defining the source of the image object previously created
       
-      obstacleimg.push(im) // add variable "im" to obstacleimg
+      obstacleobj.push(im) // add the obstacle image object to obstacleobj
 
-      // dont worry about this all you have to know is that it adds the formatting to obstaclelist
-      console.log(obstacleimg[obstacles.indexOf(obstacle)])
-      obstaclelist[obstacle] = {width: obstacleimg[obstacles.indexOf(obstacle)].naturalWidth, height: obstacleimg[obstacles.indexOf(obstacle)].naturalHeight}
+      // dont worry about this all you have to know is that it adds the formatting to obstaclelist (after the image loads)
+      im.onload = function()
+      {
+        obstaclelist[obstacle] = {width: obstacleobj[obstacles.indexOf(obstacle)].naturalWidth, height: obstacleobj[obstacles.indexOf(obstacle)].naturalHeight}
+      }
     }
+    ctx.drawImage(obstacleobj[3], 0, 0, 100, 100)
   }
 
 
