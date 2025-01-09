@@ -41,24 +41,24 @@
 <div style="padding-left:16px">
 </div>
 
-</body>
+
   
 <h1>Use the up and down arrow keys to move up and down</h1>
 
-</body>
+<button id = "start" onclick = "startgame()">start game!</button>
+
 <canvas id="carbox" width="900" height="450" style="border:1px solid #dfdfdf;"> haha your browser no worky hahahahaha</canvas>
 <script>
   var canvas = document.getElementById("carbox") // get the canvas and stuff
   var ctx = canvas.getContext("2d") // enables drawing on the canvas
+  ctx.font = "48px roboto" // global font (canvas only)
 
   var obstacleobj = [] // the list of actual image objects
-  var obstacles = ["dogshock.png", "guy.png", "pointbaby.jpeg", "asdf.jpeg"] //sources to the obstacle images, edit this manually
+  var obstacles = ["dogshock.png", "guy.png", "pointbaby.jpeg", "asdf.jpeg", "arrow.webp", "baby.jpeg", "pik.jpeg", "puddingpies.jpg", "sadge.jpeg"] //sources to the obstacle images, edit this manually
 
-  var carlane = 2; // which lane the car is currently on (top to bottom)
-  var time = 0; // time elapsed
+  obstaclelist = [] // format :  [filename, lane] 
 
-
-  obstaclelist = {} // format :  "filename":{"x":filex, "y":filey} 
+  var carlane = 2
 
   function setupgameiguess() {
     for (const obstacle of obstacles) {
@@ -67,18 +67,71 @@
       
       obstacleobj.push(im) // add the obstacle image object to obstacleobj
 
-      // dont worry about this all you have to know is that it adds the formatting to obstaclelist (after the image loads)
+      // dont worry about this, all you have to know is that it adds the formatting to obstaclelist (after the image loads)
       im.onload = function()
       {
         obstaclelist[obstacle] = {width: obstacleobj[obstacles.indexOf(obstacle)].naturalWidth, height: obstacleobj[obstacles.indexOf(obstacle)].naturalHeight}
       }
     }
-    ctx.drawImage(obstacleobj[3], 0, 0, 100, 100)
+    carimg = new Image()
+    carimg.src = "car.jpeg"
+  }
+  function startgame() {
+    clearInterval(gamesim) // just in case the game's already running
+
+    // variable time
+    var carlane = 2 // which lane the car is currently on (top to bottom)
+    var time = 0 // time elapsed in sec
+    var speed = 0 // horizontal speed in px/frame
+    
+    var gamesim = setInterval(loadframe, 10)
   }
 
+  function loadframe() {
+    // logic stuff
+    
+    //draw the current frame
+    drawframe()
+  }
 
-  function skibidiimagecoord(imagename,coord) {
-    return [coord[0]-skibidibread[imagename].width/2,coord[1]-skibidibread[imagename].height/2]
+  function drawframe() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height) //clear to draw new imgs
+    //                                  vvvvvvvv   this formula converts carlane to an actual position
+    carfixpos = imgcoordfix("car.jpeg", [300,carlane*150-75])
+    console.log(carfixpos)
+    console.log(carimg.naturalWidth)
+    console.log(carimg.naturalHeight)
+    ctx.moveTo(300,0)
+    ctx.lineTo(300,450)
+    ctx.stroke()
+    // this formula scales the image down to height 100, but keeps ratio vvvvvvvvvvv
+    ctx.drawImage(carimg, carfixpos[0], carfixpos[1], carimg.naturalWidth/(carimg.naturalHeight/100), 100)
+  }
+
+  document.addEventListener("keydown", function(event) {
+    //this is for detecting keypresses, the only ones we need are:
+    //"ArrowUp", "ArrowDown", "KeyW", "KeyS"
+    if (event.code == "ArrowUp" || event.code == "KeyW") {
+      if (carlane != 1)
+      {
+        carlane--
+      }
+    }
+    else if (event.code == "ArrowDown" || event.code == "KeyS") {
+      if (carlane != 3)
+      {
+        carlane++
+      }
+    }
+  })
+
+  // NOTE: THIS FUNCTION HAS BEEN ADAPTED TO USE THE MODIFIED DIMENSIONS OF EACH IMAGE (100 height)
+  function imgcoordfix(imagename,coord) { // use "car.jpeg" to use car
+    if (imagename == "car.jpeg") {
+      return [coord[0]-50,coord[1]-(carimg.naturalWidth/(carimg.naturalHeight/100))/2]
+    }
+    return [coord[0]-50,coord[1]-(obstaclelist[imagename].width/(carimg.height/100))/2]
   }
 </script>
+</body>
 </html>
