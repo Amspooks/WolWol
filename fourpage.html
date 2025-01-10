@@ -43,7 +43,7 @@
 
 
   
-<h1>Use the up and down arrow keys to move up and down</h1>
+<h1 id = "errormessages">Use the up and down arrow keys to move up and down</h1>
 
 <button id = "start" onclick = "startgame()">start game!</button>
 
@@ -56,9 +56,17 @@
   var obstacleobj = [] // the list of actual image objects
   var obstacles = ["dogshock.png", "guy.png", "pointbaby.jpeg", "asdf.jpeg", "arrow.webp", "baby.jpeg", "pik.jpeg", "puddingpies.jpg", "sadge.jpeg"] //sources to the obstacle images, edit this manually
 
-  obstaclelist = [] // format :  [filename, lane] 
+  var activeobstacles = [] // format :  [filename, lane, x]
+  obstaclelist = {} // format : filename:{width, height}
+  var crashanimobj = [] // Crash Animation Objects
 
   var carlane = 2
+  var time = 0
+  var speed = 0
+
+  var crashanimcounter = 0
+
+  var gamesim
 
   function setupgameiguess() {
     for (const obstacle of obstacles) {
@@ -75,6 +83,11 @@
     }
     carimg = new Image()
     carimg.src = "car.jpeg"
+    for (let i = 0; i < 18; i++) {
+      im = new Image()
+      im.src = i + ".png"
+      crashanimobj.push(im)
+    }
   }
   function startgame() {
     clearInterval(gamesim) // just in case the game's already running
@@ -84,28 +97,60 @@
     var time = 0 // time elapsed in sec
     var speed = 0 // horizontal speed in px/frame
     
-    var gamesim = setInterval(loadframe, 10)
+    gamesim = setInterval(loadframe, 20)
   }
 
   function loadframe() {
     // logic stuff
+    time++ // increase time. ALWAYS GO FIRST
+    if (time == 10){
+      endgame()
+      activeobstacles.push([obstacles[Math.floor(Math.random()*obstacles.length)], Math.ceil(Math.random()*3),600])
+    }
+    speed = 0.1*time
     
+    for (const obstacle of activeobstacles) {
+      obstacle[2] -= speed
+    }
     //draw the current frame
     drawframe()
   }
 
   function drawframe() {
     ctx.clearRect(0, 0, canvas.width, canvas.height) //clear to draw new imgs
-    //                                  vvvvvvvv   this formula converts carlane to an actual position
-    carfixpos = imgcoordfix("car.jpeg", [300,carlane*150-75])
-    console.log(carfixpos)
-    console.log(carimg.naturalWidth)
-    console.log(carimg.naturalHeight)
-    ctx.moveTo(300,0)
-    ctx.lineTo(300,450)
+    //                                         vvvvvvvv   this formula converts carlane to an actual position
+    carfixpos = imgcoordfix("car.jpeg", [200,carlane*150-75])
+
+    ctx.moveTo(0,150)
+    ctx.lineTo(900,150) //draw lane separator 1
+    ctx.moveTo(0,300)
+    ctx.lineTo(900,300) //draw lane separator 2
     ctx.stroke()
     // this formula scales the image down to height 100, but keeps ratio vvvvvvvvvvv
     ctx.drawImage(carimg, carfixpos[0], carfixpos[1], carimg.naturalWidth/(carimg.naturalHeight/100), 100)
+
+    // this WILL draw every obstacle in activeobstacles. make sure everything is sorted out in loadframe, not here
+    for (const obstacle of activeobstacles) {
+      getObstacle = obstacleobj[obstacles.indexOf(obstacle[0])]
+      var obstacleposfix = imgcoordfix(obstacle[0], [obstacle[2],obstacle[1]*150-75])
+      ctx.drawImage(getObstacle, obstacleposfix[0], obstacleposfix[1], (obstaclelist[obstacle[0]].width/(obstaclelist[obstacle[0]].height/100)), 100)
+      
+    }
+  }
+
+  function endgame() { // CALL THIS FUNCTION WHEN THE CAR CRASHES
+    document.getElementById("errormessages").innerHTML = "Heh. Your car blew up. What a loser. ID: " + gamesim
+    clearInterval(gamesim)
+    crashanimcounter = 0
+    gamesim = setInterval(crashanim, 100)
+  }
+
+  function crashanim() {
+    crashanimcounter++
+    if (crashanimcounter >= 18) { clearInterval(gamesim) }
+    drawframe()
+    ctx.drawImage(crashanimobj[crashanimcounter], carfixpos[0], carfixpos[1], crashanimobj[crashanimcounter].naturalWidth/(crashanimobj[crashanimcounter].naturalHeight/100), 100)
+    document.getElementById("errormessages").innerHTML = "u r suzzy"
   }
 
   document.addEventListener("keydown", function(event) {
@@ -128,9 +173,9 @@
   // NOTE: THIS FUNCTION HAS BEEN ADAPTED TO USE THE MODIFIED DIMENSIONS OF EACH IMAGE (100 height)
   function imgcoordfix(imagename,coord) { // use "car.jpeg" to use car
     if (imagename == "car.jpeg") {
-      return [coord[0]-50,coord[1]-(carimg.naturalWidth/(carimg.naturalHeight/100))/2]
+      return [coord[0]-(carimg.naturalWidth/(carimg.naturalHeight/100))/2,coord[1]-50]
     }
-    return [coord[0]-50,coord[1]-(obstaclelist[imagename].width/(carimg.height/100))/2]
+    return [coord[0]-(obstaclelist[imagename].width/(obstaclelist[imagename].height/100))/2,coord[1]-50]
   }
 </script>
 </body>
