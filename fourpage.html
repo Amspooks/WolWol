@@ -56,13 +56,16 @@
   var obstacleobj = [] // the list of actual image objects
   var obstacles = ["dogshock.png", "guy.png", "pointbaby.jpeg", "asdf.jpeg", "arrow.webp", "baby.jpeg", "pik.jpeg", "puddingpies.jpg", "sadge.jpeg"] //sources to the obstacle images, edit this manually
 
-  var activeobstacles = [] // format :  [filename, lane, x]
+  var activeobstacles = [] // format :  [filename, lane, x], obstacles that will be drawn actively
   obstaclelist = {} // format : filename:{width, height}
   var crashanimobj = [] // Crash Animation Objects
 
   var carlane = 2
   var time = 0
   var speed = 0
+  var difficulty = 100
+  var framesuntilobstacle = difficulty
+  var crashed = false
 
   var crashanimcounter = 0
 
@@ -83,19 +86,30 @@
     }
     carimg = new Image()
     carimg.src = "car.jpeg"
-    for (let i = 0; i < 18; i++) {
+
+    for (let i = 1; i < 18; i++) {
       im = new Image()
-      im.src = i + ".png"
+      im.src = "explosion/" + i + ".png"
       crashanimobj.push(im)
     }
+    console.log(crashanimobj)
   }
   function startgame() {
     clearInterval(gamesim) // just in case the game's already running
 
     // variable time
-    var carlane = 2 // which lane the car is currently on (top to bottom)
-    var time = 0 // time elapsed in sec
-    var speed = 0 // horizontal speed in px/frame
+    carlane = 2 // which lane the car is currently on (top to bottom)
+    time = 0 // time elapsed in sec
+    speed = 0 // horizontal speed in px/frame, related to time (look in loadframe) capped at 20
+    difficulty = 100 // amount of frames per obstacle spawned, lowers by 5 every obstacle, capped at 25
+    // additionally, the lower (harder) the difficulty, the higher the chance for double-lane combos
+    framesuntilobstacle = difficulty
+    crashed = false
+
+    activeobstacles = []
+
+    //reset the instructions
+    document.getElementById("errormessages").innerHTML = "Use the up and down arrow keys to move up and down"
     
     gamesim = setInterval(loadframe, 20)
   }
@@ -103,21 +117,66 @@
   function loadframe() {
     // logic stuff
     time++ // increase time. ALWAYS GO FIRST
-    if (time == 10){
-      endgame()
-      activeobstacles.push([obstacles[Math.floor(Math.random()*obstacles.length)], Math.ceil(Math.random()*3),600])
+    framesuntilobstacle--
+
+    if (framesuntilobstacle <= 0) {
+      spawnobstacle(Math.random()*100<(100-difficulty))
+      if (difficulty > 25) {
+        difficulty -= 5
+      }
+      framesuntilobstacle = difficulty
     }
-    speed = 0.1*time
+    speed = 5 + 0.01*time
+
+    if (speed >= 20)
+    {
+      speed = 20
+    }
     
+    var removeObstacleCount = 0
+
     for (const obstacle of activeobstacles) {
       obstacle[2] -= speed
+      if (obstacle[2] <= -500) { //check if out of bounds
+        removeObstacleCount++
+      }
+      var obstacletemp = obstacleobj[obstacles.indexOf(obstacle[0])]
+      // SIMPLIFICATION: if left bound of obstacle < right bound of car
+      if (obstacle[2] - (obstacletemp.naturalWidth/(obstacletemp.naturalHeight/100))/2 < 200+carimg.naturalWidth/(carimg.naturalHeight/100)/2) {
+        // second check if right bound of obstacle > left bound of car
+        if (obstacle[2] + (obstacletemp.naturalWidth/(obstacletemp.naturalHeight/100))/2 > 200-carimg.naturalWidth/(carimg.naturalHeight/100)/2) {
+          if (obstacle[1] == carlane) // the previous if statements are getting kind of ridiculous so i just have another if statement
+          {
+            console.log("prepare for obliteration")
+            endgame() // crash, the car's inside the obstacle image
+            return
+          }
+        }
+      }
     }
+    
+    while (removeObstacleCount > 0)
+    {
+      activeobstacles.shift()
+      removeObstacleCount--
+    }
+
+    console.log(difficulty)
+
     //draw the current frame
     drawframe()
   }
 
   function drawframe() {
     ctx.clearRect(0, 0, canvas.width, canvas.height) //clear to draw new imgs
+    
+    // this WILL draw every obstacle in activeobstacles. make sure everything is sorted out in loadframe, not here
+    for (const obstacle of activeobstacles) {
+      getObstacle = obstacleobj[obstacles.indexOf(obstacle[0])]
+      var obstacleposfix = imgcoordfix(obstacle[0], [obstacle[2], obstacle[1]*150-75])
+      ctx.drawImage(getObstacle, obstacleposfix[0], obstacleposfix[1], (obstaclelist[obstacle[0]].width/(obstaclelist[obstacle[0]].height/100)), 100)
+    }
+
     //                                         vvvvvvvv   this formula converts carlane to an actual position
     carfixpos = imgcoordfix("car.jpeg", [200,carlane*150-75])
 
@@ -128,18 +187,26 @@
     ctx.stroke()
     // this formula scales the image down to height 100, but keeps ratio vvvvvvvvvvv
     ctx.drawImage(carimg, carfixpos[0], carfixpos[1], carimg.naturalWidth/(carimg.naturalHeight/100), 100)
+  }
 
-    // this WILL draw every obstacle in activeobstacles. make sure everything is sorted out in loadframe, not here
-    for (const obstacle of activeobstacles) {
-      getObstacle = obstacleobj[obstacles.indexOf(obstacle[0])]
-      var obstacleposfix = imgcoordfix(obstacle[0], [obstacle[2],obstacle[1]*150-75])
-      ctx.drawImage(getObstacle, obstacleposfix[0], obstacleposfix[1], (obstaclelist[obstacle[0]].width/(obstaclelist[obstacle[0]].height/100)), 100)
-      
+  function spawnobstacle(doublelane) { // CALL TO SPAWN COMPLETELY RANDOM OBSTACLE
+    if (doublelane) {
+      lane1 = Math.ceil(Math.random()*3)
+      lane2 = lane1
+      while (lane2 == lane1) //this is to make sure we get a differernt lane each time
+      {
+        lane2 = Math.ceil(Math.random()*3)
+      }
+      activeobstacles.push([obstacles[Math.floor(Math.random()*obstacles.length)], lane1,1400])
+      activeobstacles.push([obstacles[Math.floor(Math.random()*obstacles.length)], lane2,1400])
+    } else {
+      activeobstacles.push([obstacles[Math.floor(Math.random()*obstacles.length)], Math.ceil(Math.random()*3),1400])
     }
   }
 
   function endgame() { // CALL THIS FUNCTION WHEN THE CAR CRASHES
-    document.getElementById("errormessages").innerHTML = "Heh. Your car blew up. What a loser. ID: " + gamesim
+    document.getElementById("errormessages").innerHTML = "Heh. Your car blew up. What a loser."
+    crashed = true
     clearInterval(gamesim)
     crashanimcounter = 0
     gamesim = setInterval(crashanim, 100)
@@ -147,25 +214,32 @@
 
   function crashanim() {
     crashanimcounter++
-    if (crashanimcounter >= 18) { clearInterval(gamesim) }
+    console.log(gamesim)
+    if (crashanimcounter >= 18) {
+      clearInterval(gamesim)
+      return
+    }
     drawframe()
-    ctx.drawImage(crashanimobj[crashanimcounter], carfixpos[0], carfixpos[1], crashanimobj[crashanimcounter].naturalWidth/(crashanimobj[crashanimcounter].naturalHeight/100), 100)
-    document.getElementById("errormessages").innerHTML = "u r suzzy"
+    // this got really messy real quick, its just a big ol formula for getting the correct position of where the crash imgs should be
+    crashposfix = [200-(crashanimobj[crashanimcounter-1].naturalWidth/(crashanimobj[crashanimcounter-1].naturalHeight/200))/2,carlane*150-75-100]
+    ctx.drawImage(crashanimobj[crashanimcounter-1], crashposfix[0], crashposfix[1], crashanimobj[crashanimcounter-1].naturalWidth/(crashanimobj[crashanimcounter-1].naturalHeight/200), 200)
   }
 
   document.addEventListener("keydown", function(event) {
     //this is for detecting keypresses, the only ones we need are:
     //"ArrowUp", "ArrowDown", "KeyW", "KeyS"
-    if (event.code == "ArrowUp" || event.code == "KeyW") {
-      if (carlane != 1)
-      {
+    if (!crashed) {
+      if (event.code == "ArrowUp" || event.code == "KeyW") {
+        if (carlane != 1)
+        {
         carlane--
+        }
       }
-    }
-    else if (event.code == "ArrowDown" || event.code == "KeyS") {
-      if (carlane != 3)
-      {
-        carlane++
+      else if (event.code == "ArrowDown" || event.code == "KeyS") {
+        if (carlane != 3)
+        {
+          carlane++
+        }
       }
     }
   })
