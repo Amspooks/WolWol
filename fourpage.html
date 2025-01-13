@@ -67,6 +67,9 @@
   var framesuntilobstacle = difficulty
   var crashed = false
 
+  var separator1offset = 0
+  var separator2offset = 0
+
   var crashanimcounter = 0
 
   var gamesim
@@ -106,6 +109,9 @@
     framesuntilobstacle = difficulty
     crashed = false
 
+    var separator1offset = Math.random()*10
+    var separator2offset = Math.random()*10
+
     activeobstacles = []
 
     //reset the instructions
@@ -121,8 +127,14 @@
 
     if (framesuntilobstacle <= 0) {
       spawnobstacle(Math.random()*100<(100-difficulty))
-      if (difficulty > 25) {
+      if (difficulty > 75) {
         difficulty -= 5
+      } else if (difficulty > 50) {
+        difficulty -= 3
+      } else if (difficulty > 35) {
+        difficulty -= 2
+      } else if (difficulty > 25) {
+        difficulty -= 1
       }
       framesuntilobstacle = difficulty
     }
@@ -163,6 +175,16 @@
 
     console.log(difficulty)
 
+    separator1offset -= speed
+    while (separator1offset < 0) {
+      separator1offset += 10
+    }
+    separator2offset -= speed
+    while (separator2offset < 0) {
+      separator2offset += 10
+    }
+
+
     //draw the current frame
     drawframe()
   }
@@ -179,7 +201,11 @@
 
     //                                         vvvvvvvv   this formula converts carlane to an actual position
     carfixpos = imgcoordfix("car.jpeg", [200,carlane*150-75])
-
+    var temp = separator1offset
+    while (temp > 10)
+    {
+      //
+    }
     ctx.moveTo(0,150)
     ctx.lineTo(900,150) //draw lane separator 1
     ctx.moveTo(0,300)
