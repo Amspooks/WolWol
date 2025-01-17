@@ -51,7 +51,6 @@
 <script>
   var canvas = document.getElementById("carbox") // get the canvas and stuff
   var ctx = canvas.getContext("2d") // enables drawing on the canvas
-  ctx.font = "48px roboto" // global font (canvas only)
 
   var obstacleobj = [] // the list of actual image objects
   var obstacles = ["dogshock.png", "guy.png", "pointbaby.jpeg", "asdf.jpeg", "arrow.webp", "baby.jpeg", "pik.jpeg", "puddingpies.jpg", "sadge.jpeg"] //sources to the obstacle images, edit this manually
@@ -63,12 +62,15 @@
   var carlane = 2
   var time = 0
   var speed = 0
+  var distance = 0
   var difficulty = 100
   var framesuntilobstacle = difficulty
   var crashed = false
+  var alertcounter = 25
 
   var separator1offset = 0
   var separator2offset = 0
+  var lineLength = 50 //HOW LONG THE LANE LINES ARE
 
   var crashanimcounter = 0
 
@@ -105,12 +107,15 @@
     time = 0 // time elapsed in sec
     speed = 0 // horizontal speed in px/frame, related to time (look in loadframe) capped at 20
     difficulty = 100 // amount of frames per obstacle spawned, lowers by 5 every obstacle, capped at 25
+    distance = 0
     // additionally, the lower (harder) the difficulty, the higher the chance for double-lane combos
     framesuntilobstacle = difficulty
     crashed = false
+    alertcounter = 25
 
-    var separator1offset = Math.random()*10
-    var separator2offset = Math.random()*10
+    separator1offset = Math.random()*lineLength*2
+    separator2offset = Math.random()*lineLength*2
+    
 
     activeobstacles = []
 
@@ -126,7 +131,8 @@
     framesuntilobstacle--
 
     if (framesuntilobstacle <= 0) {
-      spawnobstacle(Math.random()*100<(100-difficulty))
+      //Roll a number 0-100. If the number is BIGGER than difficulty, then spawn a double-lane
+      spawnobstacle(Math.random()*100>difficulty)
       if (difficulty > 75) {
         difficulty -= 5
       } else if (difficulty > 50) {
@@ -139,6 +145,7 @@
       framesuntilobstacle = difficulty
     }
     speed = 5 + 0.01*time
+    distance += speed/22500
 
     if (speed >= 20)
     {
@@ -177,13 +184,14 @@
 
     separator1offset -= speed
     while (separator1offset < 0) {
-      separator1offset += 10
+      separator1offset += lineLength*2
     }
     separator2offset -= speed
     while (separator2offset < 0) {
-      separator2offset += 10
+      separator2offset += lineLength*2
     }
 
+    //document.getElementById("errormessages").innerHTML = "1: " + separator1offset + ", 2: " + separator2offset + ", linelength: " + lineLength
 
     //draw the current frame
     drawframe()
@@ -191,6 +199,11 @@
 
   function drawframe() {
     ctx.clearRect(0, 0, canvas.width, canvas.height) //clear to draw new imgs
+    ctx.beginPath()
+    ctx.fillStyle = "#606060"
+    ctx.rect(0, 0, canvas.width, canvas.height)
+    ctx.fill()
+    ctx.beginPath()
     
     // this WILL draw every obstacle in activeobstacles. make sure everything is sorted out in loadframe, not here
     for (const obstacle of activeobstacles) {
@@ -201,18 +214,121 @@
 
     //                                         vvvvvvvv   this formula converts carlane to an actual position
     carfixpos = imgcoordfix("car.jpeg", [200,carlane*150-75])
-    var temp = separator1offset
-    while (temp > 10)
+    
+    //draw lane lines
+    ctx.strokeStyle = "#dddd00"
+    ctx.lineWidth = 5
+    for (let i = 150; i < 450; i += 150) //repeat twice, one at 150 another at 300
     {
-      //
+      var horizontalLinePos = (i==150? separator1offset : separator2offset)-lineLength*2
+      var lineThisIteration = true
+      ctx.moveTo(horizontalLinePos,i)
+      while (horizontalLinePos < 900+lineLength) //repeat until reaches screen border
+      {
+        if (lineThisIteration) { //alternating system, deciding whether to draw or not
+          // this is used to create a dashed line so we can tell that the car is moving
+          ctx.lineTo(horizontalLinePos, i)
+          //ctx.stroke()
+          //document.getElementById("errormessages").innerHTML += ", lT: " + horizontalLinePos
+          
+        } else {
+          ctx.moveTo(horizontalLinePos, i)
+          //document.getElementById("errormessages").innerHTML += ", mT: " + horizontalLinePos
+        }
+        horizontalLinePos += lineLength //move the drawer 50 px right for next time
+        lineThisIteration = !lineThisIteration
+      }
     }
-    ctx.moveTo(0,150)
-    ctx.lineTo(900,150) //draw lane separator 1
-    ctx.moveTo(0,300)
-    ctx.lineTo(900,300) //draw lane separator 2
+    
+    //speed dial
     ctx.stroke()
+    ctx.beginPath()
+    //ctx.moveTo(105,55)
+    ctx.lineWidth = 2
+    ctx.strokeStyle = "#000000"
+    ctx.fillStyle = "#333333"
+    ctx.arc(55, 55, 50, 0, Math.PI*2)
+    ctx.fill()
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.fillStyle = "#ffffff"
+    ctx.font = "8px verdana"
+    ctx.textAlign = "center"
+    var counter = 0
+    //draw the speed dial numbers
+    for (let i = (Math.PI*5)/4; i > (Math.PI*-1)/4; i -= ((Math.PI*3)/2)/8) {
+      counter += 20
+      ctx.fillText(counter, Math.cos(i)*40+55, -Math.sin(i)*40+57)
+    }
+    ctx.beginPath()
+    //alert sign when full speed
+    if (speed >= 20) {
+      alertcounter--
+      if (alertcounter < -25) {
+        alertcounter = 25
+      } else if (alertcounter < 0){ //draw the warning
+        ctx.fillStyle = "#dddd00"
+        ctx.strokeStyle = "#000000"
+        ctx.lineCap = "round"
+        ctx.moveTo(55, 75)
+        ctx.lineTo(65, 95)
+        ctx.lineTo(45, 95)
+        ctx.lineTo(55, 75)
+        ctx.fill()
+        ctx.stroke()
+        ctx.fillStyle = "#000000"
+        ctx.font = "16px verdana"
+        ctx.textAlign = "center"
+        ctx.fillText("!", 55, 93)
+        ctx.lineCap = "butt"
+        ctx.beginPath()
+      }
+    }
+
+    //red speed indicator (the whole point of the speed dial)
+    ctx.fillStyle = "#ff0000"
+    var speedDirection = ((-1.75*speed+27.5)*Math.PI)/20 //rotation of the speed indicator in radians
+    speedDirection += Math.random()*speed*0.01-((speed*0.01)/2)
+    //these silly little lines draw the speed indicator. its just a long skinny triangle
+    ctx.moveTo(55+Math.cos(speedDirection+Math.PI/2)*3, 55+Math.sin(speedDirection+Math.PI/2)*-3)
+    ctx.lineTo(55+Math.cos(speedDirection)*45, 55+Math.sin(speedDirection)*-45)
+    ctx.lineTo(55+Math.cos(speedDirection-Math.PI/2)*3, 55+Math.sin(speedDirection-Math.PI/2)*-3)
+    ctx.lineTo(55+Math.cos(speedDirection+Math.PI/2)*3, 55+Math.sin(speedDirection+Math.PI/2)*-3)
+    ctx.fill()
+
+    ctx.beginPath()
+    //center knob
+    ctx.fillStyle = "#000000"
+    ctx.arc(55, 55, 5, 0, Math.PI*2)
+    ctx.fill()
+
+    ctx.beginPath()
+    //mileage
+    //bg first
+    ctx.fillStyle = "#333333"
+    ctx.strokeStyle = "#050505"
+    ctx.rect(5, 400, 100, 45)
+    ctx.fill()
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.fillStyle = "#101010" //shadows
+    ctx.rect(5, 440, 100, 5)
+    ctx.rect(5, 400, 3, 45)
+    ctx.fill()
+    ctx.beginPath()
+    //do the thing! you know, the thing...
+    ctx.fillStyle = "#ff" + hexadecimalize(Math.max(255-distance*10,0)) + hexadecimalize(Math.max(255-distance*10,0))
+    ctx.font = "30px verdana"
+    ctx.textAlign = "right"
+    ctx.fillText(Math.floor(distance*10)/10, 80, 435)
+    ctx.font = "12px verdana"
+    ctx.textAlign = "left"
+    ctx.fillText("MI", 85, 435)
+    
+
     // this formula scales the image down to height 100, but keeps ratio vvvvvvvvvvv
     ctx.drawImage(carimg, carfixpos[0], carfixpos[1], carimg.naturalWidth/(carimg.naturalHeight/100), 100)
+    //ctx.stroke()
   }
 
   function spawnobstacle(doublelane) { // CALL TO SPAWN COMPLETELY RANDOM OBSTACLE
@@ -248,7 +364,7 @@
     drawframe()
     // this got really messy real quick, its just a big ol formula for getting the correct position of where the crash imgs should be
     crashposfix = [200-(crashanimobj[crashanimcounter-1].naturalWidth/(crashanimobj[crashanimcounter-1].naturalHeight/200))/2,carlane*150-75-100]
-    ctx.drawImage(crashanimobj[crashanimcounter-1], crashposfix[0], crashposfix[1], crashanimobj[crashanimcounter-1].naturalWidth/(crashanimobj[crashanimcounter-1].naturalHeight/200), 200)
+    ctx.drawImage(crashanimobj[crashanimcounter-1], crashposfix[0], crashposfix[1], crashanimobj[crashanimcounter-1].naturalWidth/(crashanimobj[crashanimcounter-1].naturalHeight/200), 200) //winner of the longest line of code
   }
 
   document.addEventListener("keydown", function(event) {
@@ -270,6 +386,13 @@
     }
   })
 
+  //converts a base10 number to base16 STRING using letters for the last 5
+  function hexadecimalize(num) { //ONLY CONVERTS NUMBERS UP TO 255!! Any decimals WILL be IGNORED!
+    var hexaList = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"]
+    floornum = Math.floor(num)
+    return hexaList[Math.floor(floornum/16)] + hexaList[floornum%16]
+  }
+
   // NOTE: THIS FUNCTION HAS BEEN ADAPTED TO USE THE MODIFIED DIMENSIONS OF EACH IMAGE (100 height)
   function imgcoordfix(imagename,coord) { // use "car.jpeg" to use car
     if (imagename == "car.jpeg") {
@@ -277,6 +400,10 @@
     }
     return [coord[0]-(obstaclelist[imagename].width/(obstaclelist[imagename].height/100))/2,coord[1]-50]
   }
+
+  //lT: 5.29268280145763, mT: 55.29268280145763, lT: 105.29268280145763, mT: 155.29268280145763, lT: 205.29268280145763, mT: 255.29268280145763, ||| lT: 16.903780791254754, mT: 66.90378079125475, lT: 116.90378079125475, mT: 166.90378079125475, lT: 216.90378079125475, mT: 266.90378079125475
+  //lT: 45.24268280145763, mT: 95.24268280145763, lT: 145.24268280145765, mT: 195.24268280145765, lT: 245.24268280145765, mT: 295.24268280145765, ||| lT: 6.853780791254754, mT: 56.853780791254756, lT: 106.85378079125476, mT: 156.85378079125476, lT: 206.85378079125476, mT: 256.85378079125474
+
 </script>
 </body>
 </html>
