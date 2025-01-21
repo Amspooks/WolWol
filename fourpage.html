@@ -67,6 +67,11 @@
   var framesuntilobstacle = difficulty
   var crashed = false
   var alertcounter = 25
+  var nearmisscounter = 0
+  var lanechain = 0
+  var chainlane = 0
+  var scale = 100 //100 is normalsize
+  var lastchain = false
 
   var separator1offset = 0
   var separator2offset = 0
@@ -97,21 +102,23 @@
       im.src = "explosion/" + i + ".png"
       crashanimobj.push(im)
     }
-    console.log(crashanimobj)
   }
   function startgame() {
     clearInterval(gamesim) // just in case the game's already running
 
     // variable time
     carlane = 2 // which lane the car is currently on (top to bottom)
-    time = 0 // time elapsed in sec
+    time = 0 // time elapsed in frames
     speed = 0 // horizontal speed in px/frame, related to time (look in loadframe) capped at 20
-    difficulty = 100 // amount of frames per obstacle spawned, lowers by 5 every obstacle, capped at 25
+    difficulty = 100 // amount of frames per obstacle spawned, lowers depending on the difficulty every obstacle, capped at 25
     distance = 0
+    lanechain = 0
     // additionally, the lower (harder) the difficulty, the higher the chance for double-lane combos
     framesuntilobstacle = difficulty
     crashed = false
     alertcounter = 25
+    nearmisscounter = 0
+    lastchain = false
 
     separator1offset = Math.random()*lineLength*2
     separator2offset = Math.random()*lineLength*2
@@ -130,9 +137,41 @@
     time++ // increase time. ALWAYS GO FIRST
     framesuntilobstacle--
 
+    if (lastchain) {
+      lastchain = false
+      chainlane = 0
+    }
+    
     if (framesuntilobstacle <= 0) {
+      if (Math.random()*100<speed-15) {
+        if (lanechain == 0) {
+          lanechain = 5
+          chainlane = carlane
+        }
+      }
+      if (lanechain > 0) {
+        lanechain--
+        if (lanechain == 0) { //lane chain reached 0
+          chainlane = Math.ceil(Math.random()*3)
+          while (chainlane == 2) { //same as below
+            chainlane = Math.ceil(Math.random()*3)
+          }
+          lastchain = true
+        }
+      }
+      if (lanechain > 0) {
+        if (chainlane == 2)
+        {
+          chainlane = Math.ceil(Math.random()*3)
+          while (chainlane == 2) { //make sure it changes
+            chainlane = Math.ceil(Math.random()*3)
+          }
+        } else {
+          chainlane = 2 //Math.random() > 0? 2 : chainlane
+        }
+      }
       //Roll a number 0-100. If the number is BIGGER than difficulty, then spawn a double-lane
-      spawnobstacle(Math.random()*100>difficulty)
+      spawnobstacle(lanechain > 0? true: Math.random()*100>difficulty,chainlane)
       if (difficulty > 75) {
         difficulty -= 5
       } else if (difficulty > 50) {
@@ -142,15 +181,10 @@
       } else if (difficulty > 25) {
         difficulty -= 1
       }
-      framesuntilobstacle = difficulty
+      framesuntilobstacle = lanechain > 0? Math.round(difficulty/1.5) : difficulty
     }
-    speed = 5 + 0.01*time
+    speed = speed >= 20 ? 18.5 + 0.001*time : 5 + 0.01*time
     distance += speed/22500
-
-    if (speed >= 20)
-    {
-      speed = 20
-    }
     
     var removeObstacleCount = 0
 
@@ -160,15 +194,22 @@
         removeObstacleCount++
       }
       var obstacletemp = obstacleobj[obstacles.indexOf(obstacle[0])]
-      // SIMPLIFICATION: if left bound of obstacle < right bound of car
-      if (obstacle[2] - (obstacletemp.naturalWidth/(obstacletemp.naturalHeight/100))/2 < 200+carimg.naturalWidth/(carimg.naturalHeight/100)/2) {
-        // second check if right bound of obstacle > left bound of car
-        if (obstacle[2] + (obstacletemp.naturalWidth/(obstacletemp.naturalHeight/100))/2 > 200-carimg.naturalWidth/(carimg.naturalHeight/100)/2) {
-          if (obstacle[1] == carlane) // the previous if statements are getting kind of ridiculous so i just have another if statement
+      // the next if statements are getting kind of ridiculous so i just this if statement outside
+      if (obstacle[1] == carlane) {
+        // SIMPLIFICATION: if right bound of obstacle > left bound of car
+        if (obstacle[2] + (obstacletemp.naturalWidth/(obstacletemp.naturalHeight/scale))/2 > 200-carimg.naturalWidth/(carimg.naturalHeight/scale)/2) {
+          // second check if left bound of obstacle < right bound of car
+          if (obstacle[2] - (obstacletemp.naturalWidth/(obstacletemp.naturalHeight/scale))/2 < 200+carimg.naturalWidth/(carimg.naturalHeight/scale)/2)
           {
             console.log("prepare for obliteration")
             endgame() // crash, the car's inside the obstacle image
             return
+          //another check to see if it was a near miss (left bound of obstacle < right bound of car + 10)
+          } else if (obstacle[2] - (obstacletemp.naturalWidth/(obstacletemp.naturalHeight/scale))/2 < 200+carimg.naturalWidth/(carimg.naturalHeight/scale)/2+20) {
+            //it was a near miss
+            if (nearmisscounter == 0) {
+              nearmisscounter = 25
+            }
           }
         }
       }
@@ -179,8 +220,6 @@
       activeobstacles.shift()
       removeObstacleCount--
     }
-
-    console.log(difficulty)
 
     separator1offset -= speed
     while (separator1offset < 0) {
@@ -209,11 +248,8 @@
     for (const obstacle of activeobstacles) {
       getObstacle = obstacleobj[obstacles.indexOf(obstacle[0])]
       var obstacleposfix = imgcoordfix(obstacle[0], [obstacle[2], obstacle[1]*150-75])
-      ctx.drawImage(getObstacle, obstacleposfix[0], obstacleposfix[1], (obstaclelist[obstacle[0]].width/(obstaclelist[obstacle[0]].height/100)), 100)
+      ctx.drawImage(getObstacle, obstacleposfix[0], obstacleposfix[1], (obstaclelist[obstacle[0]].width/(obstaclelist[obstacle[0]].height/scale)), scale)
     }
-
-    //                                         vvvvvvvv   this formula converts carlane to an actual position
-    carfixpos = imgcoordfix("car.jpeg", [200,carlane*150-75])
     
     //draw lane lines
     ctx.strokeStyle = "#dddd00"
@@ -325,19 +361,37 @@
     ctx.textAlign = "left"
     ctx.fillText("MI", 85, 435)
     
-
+    //                                         vvvvvvvv   this formula converts carlane to an actual position
+    carfixpos = imgcoordfix("car.jpeg", [200,carlane*150-75])
     // this formula scales the image down to height 100, but keeps ratio vvvvvvvvvvv
-    ctx.drawImage(carimg, carfixpos[0], carfixpos[1], carimg.naturalWidth/(carimg.naturalHeight/100), 100)
-    //ctx.stroke()
+    ctx.drawImage(carimg, carfixpos[0], carfixpos[1], carimg.naturalWidth/(carimg.naturalHeight/scale), scale)
+
+    //near miss "!"
+    if (nearmisscounter > 0) {
+      ctx.font = "40px trebuchet ms"
+      ctx.fillStyle = "rgb(255 125 0 / " + (100/25)*nearmisscounter + "%)"
+      ctx.fillText("!",205+(carimg.naturalWidth/(carimg.naturalHeight/scale))/2,carlane*150-75)
+      nearmisscounter--
+    }
   }
 
-  function spawnobstacle(doublelane) { // CALL TO SPAWN COMPLETELY RANDOM OBSTACLE
+  function spawnobstacle(doublelane, doublelanereq) { // CALL TO SPAWN COMPLETELY RANDOM OBSTACLE, DOUBLELANE IS A BOOL
+    //DOUBLELANEREQ IS A NUMBER AND WILL PREVENT AN OBSTACLE FROM SPAWNING ON THAT LANE, IF ITS INVALID IT WILL BE IGNORED
     if (doublelane) {
       lane1 = Math.ceil(Math.random()*3)
       lane2 = lane1
-      while (lane2 == lane1) //this is to make sure we get a differernt lane each time
-      {
-        lane2 = Math.ceil(Math.random()*3)
+      if (doublelanereq != null) {
+        //this is to make sure we get a different lane each time, also to not spawn on doublelanereq lane
+        while (lane2 == lane1 || (lane1 == doublelanereq || lane2 == doublelanereq))
+        {
+          lane1 = Math.ceil(Math.random()*3)
+          lane2 = Math.ceil(Math.random()*3)
+        }
+      } else {
+        while (lane2 == lane1) //same as the other, without the requirement
+        {
+          lane2 = Math.ceil(Math.random()*3)
+        }
       }
       activeobstacles.push([obstacles[Math.floor(Math.random()*obstacles.length)], lane1,1400])
       activeobstacles.push([obstacles[Math.floor(Math.random()*obstacles.length)], lane2,1400])
@@ -356,7 +410,6 @@
 
   function crashanim() {
     crashanimcounter++
-    console.log(gamesim)
     if (crashanimcounter >= 18) {
       clearInterval(gamesim)
       return
@@ -396,14 +449,39 @@
   // NOTE: THIS FUNCTION HAS BEEN ADAPTED TO USE THE MODIFIED DIMENSIONS OF EACH IMAGE (100 height)
   function imgcoordfix(imagename,coord) { // use "car.jpeg" to use car
     if (imagename == "car.jpeg") {
-      return [coord[0]-(carimg.naturalWidth/(carimg.naturalHeight/100))/2,coord[1]-50]
+      return [coord[0]-(carimg.naturalWidth/(carimg.naturalHeight/scale))/2,coord[1]-scale/2]
     }
-    return [coord[0]-(obstaclelist[imagename].width/(obstaclelist[imagename].height/100))/2,coord[1]-50]
+    return [coord[0]-(obstaclelist[imagename].width/(obstaclelist[imagename].height/scale))/2,coord[1]-scale/2]
   }
 
   //lT: 5.29268280145763, mT: 55.29268280145763, lT: 105.29268280145763, mT: 155.29268280145763, lT: 205.29268280145763, mT: 255.29268280145763, ||| lT: 16.903780791254754, mT: 66.90378079125475, lT: 116.90378079125475, mT: 166.90378079125475, lT: 216.90378079125475, mT: 266.90378079125475
   //lT: 45.24268280145763, mT: 95.24268280145763, lT: 145.24268280145765, mT: 195.24268280145765, lT: 245.24268280145765, mT: 295.24268280145765, ||| lT: 6.853780791254754, mT: 56.853780791254756, lT: 106.85378079125476, mT: 156.85378079125476, lT: 206.85378079125476, mT: 256.85378079125474
 
+  function smartcar() {
+    const carposx = 200;
+    const carimgwidth = carimg.naturalWidth / (carimg.naturalHeight / 100) / 2;
+    var Avaliable = [1,2,3]
+
+    const ClosestObstacles = activeobstacles.filter(x => x[1]);
+    const XObstacles = ClosestObstacles.filter(x => x[2]);
+    
+    
+    for (const obstacle of XObstacles) {
+        const obstacletemp = obstacleobj[obstacles.indexOf(obstacle[0])]
+        const obstacleWidth = obstacletemp.naturalWidth / (obstacletemp.naturalHeight / 100) / 2;
+        const obstaclePosX = obstacle[2]; 
+        
+        if (Avaliable.length==1) {break}
+        if (obstaclePosX - obstacleWidth < carposx + carimgwidth*1.5 &&
+            obstaclePosX + obstacleWidth > carposx - carimgwidth*1.5) {
+            Avaliable = Avaliable.filter(x => x!==obstacle[1])
+            continue
+        }
+    }
+
+    
+    carlane = Avaliable.includes(carlane) ? carlane : Avaliable[0];
+  }
 </script>
 </body>
 </html>
